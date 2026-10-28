@@ -1,0 +1,28 @@
+import django.db.models.deletion
+from django.conf import settings
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Profile',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('role', models.CharField(choices=[('tenant', 'Арендатор'), ('owner', 'Владелец'), ('moderator', 'Модератор')], default='tenant', max_length=10, verbose_name='Роль')),
+                ('phone', models.CharField(blank=True, max_length=30, verbose_name='Телефон')),
+                ('bio', models.TextField(blank=True, max_length=2000, verbose_name='О себе')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'permissions': [('moderate_property', 'Может модерировать объявления и жалобы')],
+            },
+        ),
+    ]

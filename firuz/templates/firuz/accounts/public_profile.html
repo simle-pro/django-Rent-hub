@@ -1,0 +1,7 @@
+{% extends 'firuz/base.html' %}
+{% block title %}{{ owner.username }} — RentHub{% endblock %}
+{% block content %}
+<h1>Владелец {{ owner.username }}</h1>
+<p>{{ owner.get_full_name }}</p>
+{{ profile.bio|linebreaks }}
+{% endblock %}
