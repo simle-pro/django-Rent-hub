@@ -1,0 +1,9 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Редактирование профиля — RentHub{% endblock %}
+{% block content %}
+<h1>Редактирование профиля</h1>
+<form method="post">
+    {% csrf_token %}{{ user_form.as_p }}{{ form.as_p }}
+    <button type="submit">Сохранить</button>
+</form>
+{% endblock %}

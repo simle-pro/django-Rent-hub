@@ -1,0 +1,19 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Личный кабинет — RentHub{% endblock %}
+{% block content %}
+<h1>Личный кабинет</h1>
+<p>{{ user.username }}</p>
+<p>{{ user.get_full_name }}</p>
+<p>{{ user.email }}</p>
+<p>{{ profile.phone }}</p>
+{{ profile.bio|linebreaks }}
+{% if is_moderator %}
+    <h2>Кабинет модератора</h2>
+{% elif profile.role == 'owner' %}
+    <h2>Кабинет владельца</h2>
+    <a href="{% url 'firuz:public_profile' user.pk %}">Публичная страница</a>
+{% else %}
+    <h2>Кабинет арендатора</h2>
+{% endif %}
+<a href="{% url 'firuz:profile_edit' %}">Редактировать профиль</a>
+{% endblock %}

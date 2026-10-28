@@ -1,0 +1,9 @@
+{% extends 'firuz/base.html' %}
+{% block content %}
+{% if invalid %}
+    <h1>Ссылка недействительна</h1>
+{% else %}
+    <h1>Подтверждение email</h1>
+    <form method="post">{% csrf_token %}<button type="submit">Подтвердить email</button></form>
+{% endif %}
+{% endblock %}
