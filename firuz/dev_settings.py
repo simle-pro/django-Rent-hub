@@ -1,4 +1,3 @@
-"""Локальный запуск своей части, пока URL приложений коллег не созданы."""
 from server.settings import *
 
 ROOT_URLCONF = 'firuz.dev_urls'

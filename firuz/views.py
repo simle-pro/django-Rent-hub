@@ -106,16 +106,4 @@ def profile_edit(request):
 @require_GET
 def public_profile(request, pk):
     owner = get_object_or_404(get_user_model(), pk=pk, is_active=True, profile__role='owner')
-    # TODO: после согласования модели Property добавить опубликованные объявления владельца.
     return render(request, 'firuz/accounts/public_profile.html', {'owner': owner, 'profile': owner.profile})
-
-
-# TODO: отзывы и модерация — после согласования с участником 1 модели Property,
-# поля владельца, статусов и разрешённых переходов. Не подменять ForeignKey
-# обычным числовым ID и не создавать копию модели из чужого приложения.
-# Review: POST create/<property_id>/ и POST <pk>/delete/ (только свой отзыв).
-# Согласовать ограничения отзывов с командой (свой объект, повторный отзыв, аренда).
-# PropertyReport: GET/POST reports/create/<property_id>/, GET reports/,
-# POST reports/<pk>/resolve/ с проверкой права firuz.moderate_property.
-# Модерация: GET properties/, POST properties/<pk>/approve/ и reject/;
-# проверять право firuz.moderate_property и допустимый исходный статус.
