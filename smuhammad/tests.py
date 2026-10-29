@@ -106,6 +106,32 @@ class PropertyVisibilityTests(PropertyTestCase):
         self.assertIn(self.approved, list(found.context['properties']))
         self.assertNotIn(self.pending, list(found.context['properties']))
 
+    def test_catalog_filters_by_category(self):
+        other_category = PropertyCategory.objects.create(name='Дом')
+        house = self.create_property(
+            status=PropertyStatus.APPROVED,
+            title='Дом в предгорье',
+            category=other_category,
+        )
+        response = self.client.get(
+            reverse('smuhammad:property_list'), {'category': other_category.pk}
+        )
+        self.assertEqual(list(response.context['properties']), [house])
+        response = self.client.get(
+            reverse('smuhammad:property_list'), {'category': self.category.pk}
+        )
+        self.assertEqual(list(response.context['properties']), [self.approved])
+
+    def test_owner_sees_rejection_reason_on_detail(self):
+        self.rejected.moderation_reason = 'Не хватает фотографий'
+        self.rejected.save()
+        self.client.login(username='owner', password='pass-12345')
+        response = self.client.get(
+            reverse('smuhammad:property_detail', args=[self.rejected.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Не хватает фотографий')
+
     def test_guest_opens_only_approved_detail(self):
         url = reverse('smuhammad:property_detail', args=[self.approved.pk])
         self.assertEqual(self.client.get(url).status_code, 200)
@@ -307,6 +333,16 @@ class PropertyStatusActionTests(PropertyTestCase):
         self.client.post(reverse('smuhammad:property_submit', args=[property_obj.pk]))
         property_obj.refresh_from_db()
         self.assertEqual(property_obj.status, PropertyStatus.PENDING)
+
+    def test_submit_clears_rejection_reason(self):
+        property_obj = self.create_property(
+            status=PropertyStatus.REJECTED, moderation_reason='Не хватает фотографий'
+        )
+        self.client.login(username='owner', password='pass-12345')
+        self.client.post(reverse('smuhammad:property_submit', args=[property_obj.pk]))
+        property_obj.refresh_from_db()
+        self.assertEqual(property_obj.status, PropertyStatus.PENDING)
+        self.assertEqual(property_obj.moderation_reason, '')
 
     def test_owner_hides_approved_property(self):
         property_obj = self.create_property(status=PropertyStatus.APPROVED)
