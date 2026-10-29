@@ -1,0 +1,55 @@
+{% extends "smuhammad/base.html" %}
+
+{% block title %}{{ property.title }}{% endblock %}
+
+{% block content %}
+  <h1>{{ property.title }}</h1>
+
+  <p>
+    Статус: {{ property.get_status_display }}
+    · Владелец: {{ property.owner.username }}
+  </p>
+
+  {% if property.status == 'rejected' and user.is_authenticated and property.owner_id == user.pk %}
+    <p><strong>Причина отклонения:</strong> {{ property.moderation_reason|default:"не указана" }}</p>
+  {% endif %}
+
+  {% for image in property.images.all %}
+    <p><img src="{{ image.image.url }}" alt="{{ property.title }}"></p>
+  {% endfor %}
+
+  <p><strong>{{ property.price }} ₽ / сутки</strong></p>
+  <p><strong>Категория:</strong> {{ property.category }}</p>
+  <p><strong>Местоположение:</strong> {{ property.location }}</p>
+  <p>{{ property.description }}</p>
+
+  {% if property.amenities.all %}
+    <p><strong>Удобства:</strong>
+      {% for amenity in property.amenities.all %}{{ amenity }}{% if not forloop.last %}, {% endif %}{% endfor %}
+    </p>
+  {% endif %}
+
+  {% if user.is_authenticated and property.owner_id == user.pk %}
+    <hr>
+    <h2>Действия владельца</h2>
+    <p>
+      <a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить</a>
+      · <a href="{% url 'smuhammad:property_images' property.pk %}">Фотографии</a>
+      · <a href="{% url 'smuhammad:property_delete' property.pk %}">Удалить</a>
+    </p>
+
+    {% if property.status == 'draft' or property.status == 'rejected' or property.status == 'hidden' %}
+      <form method="post" action="{% url 'smuhammad:property_submit' property.pk %}">
+        {% csrf_token %}
+        <button type="submit">Отправить на модерацию</button>
+      </form>
+    {% endif %}
+
+    {% if property.status == 'approved' or property.status == 'pending' %}
+      <form method="post" action="{% url 'smuhammad:property_hide' property.pk %}">
+        {% csrf_token %}
+        <button type="submit">Скрыть из каталога</button>
+      </form>
+    {% endif %}
+  {% endif %}
+{% endblock %}

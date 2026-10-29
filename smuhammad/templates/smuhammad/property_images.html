@@ -1,0 +1,35 @@
+{% extends "smuhammad/base.html" %}
+
+{% block title %}Фотографии — {{ property.title }}{% endblock %}
+
+{% block content %}
+  <h1>Фотографии: {{ property.title }}</h1>
+  <p>
+    <a href="{% url 'smuhammad:property_detail' property.pk %}">К объявлению</a>
+    · <a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить описание</a>
+  </p>
+
+  <h2>Добавленные фотографии ({{ images|length }} из {{ max_images }})</h2>
+  {% if images %}
+    <div>
+      {% for image in images %}
+        <div>
+          <img src="{{ image.image.url }}" alt="Фотография объявления {{ property.title }}">
+          <form method="post" action="{% url 'smuhammad:property_image_delete' image.pk %}">
+            {% csrf_token %}
+            <button type="submit">Удалить фото</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Фотографий пока нет.</p>
+  {% endif %}
+
+  <h2>Загрузить фотографии</h2>
+  <form method="post" action="{% url 'smuhammad:property_images_add' property.pk %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Загрузить</button>
+  </form>
+{% endblock %}

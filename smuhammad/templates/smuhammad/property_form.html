@@ -1,0 +1,18 @@
+{% extends "smuhammad/base.html" %}
+
+{% block title %}{% if property %}Изменить объявление{% else %}Новое объявление{% endif %}{% endblock %}
+
+{% block content %}
+  <h1>{% if property %}Изменить «{{ property.title }}»{% else %}Новое объявление{% endif %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить</button>
+    <a href="{% if property %}{% url 'smuhammad:property_detail' property.pk %}{% else %}{% url 'smuhammad:my_properties' %}{% endif %}">Отмена</a>
+  </form>
+
+  {% if property and property.status == 'approved' %}
+    <p>После изменения опубликованное объявление снова уйдёт на модерацию.</p>
+  {% endif %}
+{% endblock %}
