@@ -29,6 +29,8 @@ DATABASES = {
     },
 }
 
-# Фрагмент для ответственного за общую конфигурацию (в server/settings.py):
+# Медиа в dev держу в своей папке, как и базу smuhammad/db.sqlite3.
+# Фрагмент для общего server/settings.py (его правит ответственный за
+# интеграцию): MEDIA_URL = '/media/', MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'smuhammad' / 'media'
