@@ -3,10 +3,17 @@ from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Property
+from .models import Property, Location
 
 MAX_IMAGES_PER_PROPERTY = 10
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+
+class LocationForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ['city', 'address', 'description']
+        widgets = {'description': forms.Textarea(attrs={'rows': 3})}
 
 
 class PropertyForm(forms.ModelForm):

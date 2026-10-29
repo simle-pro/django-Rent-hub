@@ -1,2 +1,10 @@
 .venv
 db.sqlite3
+__pycache__/
+*.py[cod]
+.env
+.myvenv/
+media/
+*.sqlite3
+*.sqlite3-journal
+email_config.json

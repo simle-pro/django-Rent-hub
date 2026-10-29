@@ -4,4 +4,13 @@
 <h1>Владелец {{ owner.username }}</h1>
 <p>{{ owner.get_full_name }}</p>
 {{ profile.bio|linebreaks }}
+<h2>Опубликованные объявления</h2>
+{% for property in page_obj %}
+    <article>
+        <h3><a href="{{ property.get_absolute_url }}">{{ property.title }}</a></h3>
+        <p>{{ property.location }} — {{ property.price }} ₽ / сутки</p>
+        <a href="{% url 'firuz:property_reviews' property.pk %}">Отзывы</a>
+    </article>
+{% empty %}<p>Опубликованных объявлений пока нет.</p>{% endfor %}
+{% include 'firuz/includes/pagination.html' %}
 {% endblock %}

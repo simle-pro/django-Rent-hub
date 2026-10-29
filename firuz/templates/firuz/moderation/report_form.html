@@ -1,0 +1,9 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Жалоба — RentHub{% endblock %}
+{% block content %}
+<h1>Жалоба: {{ property.title }}</h1>
+<form method="post">
+    {% csrf_token %}{{ form.as_p }}<button type="submit">Отправить жалобу</button>
+</form>
+<a href="{% url 'firuz:property_reviews' property.pk %}">Вернуться</a>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183f35">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <title>{% block title %}RentHub — место для вашей жизни{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+    <a class="skip-link" href="#main">К содержимому</a>
+    {% include 'includes/navbar.html' %}
+    <main id="main" class="site-main container {% block main_class %}{% endblock %}">
+        {% include 'includes/messages.html' %}
+        {% block content %}{% endblock %}
+    </main>
+    {% include 'includes/footer.html' %}
+</body>
+</html>

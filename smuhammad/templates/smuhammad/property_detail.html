@@ -1,55 +1,29 @@
-{% extends "smuhammad/base.html" %}
-
-{% block title %}{{ property.title }}{% endblock %}
-
+{% extends 'base.html' %}
+{% block title %}{{ property.title }} — RentHub{% endblock %}
 {% block content %}
-  <h1>{{ property.title }}</h1>
-
-  <p>
-    Статус: {{ property.get_status_display }}
-    · Владелец: {{ property.owner.username }}
-  </p>
-
-  {% if property.status == 'rejected' and user.is_authenticated and property.owner_id == user.pk %}
-    <p><strong>Причина отклонения:</strong> {{ property.moderation_reason|default:"не указана" }}</p>
-  {% endif %}
-
-  {% for image in property.images.all %}
-    <p><img src="{{ image.image.url }}" alt="{{ property.title }}"></p>
-  {% endfor %}
-
-  <p><strong>{{ property.price }} ₽ / сутки</strong></p>
-  <p><strong>Категория:</strong> {{ property.category }}</p>
-  <p><strong>Местоположение:</strong> {{ property.location }}</p>
-  <p>{{ property.description }}</p>
-
-  {% if property.amenities.all %}
-    <p><strong>Удобства:</strong>
-      {% for amenity in property.amenities.all %}{{ amenity }}{% if not forloop.last %}, {% endif %}{% endfor %}
-    </p>
-  {% endif %}
-
-  {% if user.is_authenticated and property.owner_id == user.pk %}
-    <hr>
-    <h2>Действия владельца</h2>
-    <p>
-      <a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить</a>
-      · <a href="{% url 'smuhammad:property_images' property.pk %}">Фотографии</a>
-      · <a href="{% url 'smuhammad:property_delete' property.pk %}">Удалить</a>
-    </p>
-
-    {% if property.status == 'draft' or property.status == 'rejected' or property.status == 'hidden' %}
-      <form method="post" action="{% url 'smuhammad:property_submit' property.pk %}">
-        {% csrf_token %}
-        <button type="submit">Отправить на модерацию</button>
-      </form>
+<p class="small-link"><a href="{% url 'simple:search' %}">← К поиску жилья</a></p>
+<div class="property-page-heading"><div><p class="eyebrow">{{ property.category }} · {{ property.location.city }}</p><h1>{{ property.title }}</h1><p class="muted">{{ property.location }}</p></div><span class="badge badge-{{ property.status }}">{{ property.get_status_display }}</span></div>
+{% if property.status == 'rejected' and user.is_authenticated and property.owner_id == user.pk %}<div class="notice notice-error"><strong>Причина отклонения:</strong> {{ property.moderation_reason|default:'не указана' }}</div>{% endif %}
+<div class="property-detail-grid"><div>
+    <div class="gallery">{% for image in property.images.all %}<a href="{{ image.image.url }}" target="_blank" rel="noopener"><img src="{{ image.image.url }}" alt="Фотография {{ forloop.counter }}: {{ property.title }}"></a>{% empty %}<div class="property-placeholder"><span>⌂</span><small>Владелец пока не добавил фотографии</small></div>{% endfor %}</div>
+    <div class="detail-copy"><h2>Об этом месте</h2>{{ property.description|linebreaks }}<h2>Детали, которые важны</h2><div class="chips">{% for amenity in property.amenities.all %}<span class="chip">✓ {{ amenity.name }}</span>{% empty %}<p>Удобства пока не указаны.</p>{% endfor %}</div></div>
+    {% if property.is_public %}<div class="panel" style="margin-top:30px"><p class="eyebrow">ОПЫТ ДРУГИХ ЛЮДЕЙ</p><h2>У каждого места есть история</h2><p class="muted">Посмотрите отзывы арендаторов или поделитесь своими впечатлениями.</p><a class="text-link" href="{% url 'firuz:property_reviews' property.pk %}">Отзывы об объявлении ↗</a></div>{% endif %}
+</div><aside class="panel booking-panel">
+    <p class="price-large">{{ property.price }} ₽ <small>/ сутки</small></p><p class="muted">Даты и подтверждение — в вашей заявке.</p>
+    {% if property.is_public %}
+        {% if user.is_authenticated %}
+            {% if user.pk != property.owner_id and user.profile.role == 'tenant' %}<a class="button" href="{% url 'simple:booking_create' property.pk %}">Подать заявку на аренду ↗</a>{% endif %}
+            <form method="post" action="{% url 'simple:favorite_toggle' property.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button type="submit" class="button-secondary" style="width:100%">{% if is_favorite %}Убрать из избранного{% else %}В избранное ♡{% endif %}</button></form>
+        {% else %}<a class="button" href="{% url 'firuz:login' %}?next={{ request.path|urlencode }}">Войти и подать заявку ↗</a>{% endif %}
     {% endif %}
-
-    {% if property.status == 'approved' or property.status == 'pending' %}
-      <form method="post" action="{% url 'smuhammad:property_hide' property.pk %}">
-        {% csrf_token %}
-        <button type="submit">Скрыть из каталога</button>
-      </form>
+    <div class="owner-line"><span class="avatar avatar-small">{{ property.owner.username|first|upper }}</span><p>Владелец<strong>{% if property.owner.profile.role == 'owner' %}<a href="{% url 'firuz:public_profile' property.owner_id %}">{{ property.owner.username }}</a>{% else %}{{ property.owner.username }}{% endif %}</strong></p></div>
+    {% if property.is_public and user.is_authenticated and user.pk != property.owner_id %}<a class="small-link" href="{% url 'firuz:report_create' property.pk %}">Сообщить о проблеме с объявлением</a>{% endif %}
+    {% if user.is_authenticated and property.owner_id == user.pk %}
+        <hr><h3>Управление объявлением</h3>
+        <p><a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить</a> · <a href="{% url 'smuhammad:property_images' property.pk %}">Фотографии</a> · <a href="{% url 'smuhammad:property_delete' property.pk %}">Удалить</a></p>
+        {% if property.status == 'draft' or property.status == 'rejected' or property.status == 'hidden' %}<form method="post" action="{% url 'smuhammad:property_submit' property.pk %}">{% csrf_token %}<button type="submit" style="width:100%">Отправить на модерацию</button></form>{% endif %}
+        {% if property.status == 'approved' or property.status == 'pending' %}<form method="post" action="{% url 'smuhammad:property_hide' property.pk %}">{% csrf_token %}<button class="button-secondary" type="submit" style="width:100%;margin-top:12px">Скрыть из каталога</button></form>{% endif %}
     {% endif %}
-  {% endif %}
+    {% if perms.firuz.moderate_property and property.status == 'pending' and user.pk != property.owner_id %}<hr><a class="button" href="{% url 'firuz:pending_properties' %}">Перейти к модерации</a>{% endif %}
+</aside></div>
 {% endblock %}

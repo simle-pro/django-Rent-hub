@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.decorators.http import require_POST
+from django.urls import reverse
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -14,7 +16,7 @@ from django.views.generic import (
     UpdateView,
 )
 
-from .forms import MAX_IMAGES_PER_PROPERTY, PropertyForm, PropertyImagesForm
+from .forms import MAX_IMAGES_PER_PROPERTY, PropertyForm, PropertyImagesForm, LocationForm
 from .models import Property, PropertyCategory, PropertyImage, PropertyStatus
 
 LOGIN_URL = 'firuz:login'
@@ -62,6 +64,11 @@ class PropertyDetailView(DetailView):
     template_name = 'smuhammad/property_detail.html'
     context_object_name = 'property'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_favorite'] = self.request.user.is_authenticated and self.object.favorites.filter(user=self.request.user).exists()
+        return context
+
     def get_queryset(self):
         queryset = Property.objects.select_related(
             'owner', 'category', 'location'
@@ -81,6 +88,18 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
     form_class = PropertyForm
     template_name = 'smuhammad/property_form.html'
     login_url = LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.profile.role != 'owner':
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        location = self.request.GET.get('location', '')
+        if location.isdecimal() and len(location) < 19:
+            initial['location'] = location
+        return initial
 
     def form_valid(self, form):
         property_obj = form.save(commit=False)
@@ -219,18 +238,18 @@ def add_property_images(request, pk):
         return redirect('smuhammad:property_images', pk=property_obj.pk)
 
     images = form.cleaned_data['images']
-    already_uploaded = property_obj.images.count()
-    if already_uploaded + len(images) > MAX_IMAGES_PER_PROPERTY:
-        messages.error(
-            request,
-            f'У объявления уже {already_uploaded} фото, не больше '
-            f'{MAX_IMAGES_PER_PROPERTY} на всё объявление.',
-        )
-        return redirect('smuhammad:property_images', pk=property_obj.pk)
-
     with transaction.atomic():
+        property_obj = get_object_or_404(Property.objects.select_for_update(), pk=pk, owner=request.user)
+        already_uploaded = property_obj.images.count()
+        if already_uploaded + len(images) > MAX_IMAGES_PER_PROPERTY:
+            messages.error(request, f'У объявления уже {already_uploaded} фото, не больше {MAX_IMAGES_PER_PROPERTY} на всё объявление.')
+            return redirect('smuhammad:property_images', pk=property_obj.pk)
         for image in images:
             PropertyImage.objects.create(property=property_obj, image=image)
+        if property_obj.status == PropertyStatus.APPROVED:
+            property_obj.status = PropertyStatus.PENDING
+            property_obj.save(update_fields=['status', 'updated_at'])
+            messages.info(request, 'После изменения фотографий объявление отправлено на повторную модерацию.')
     messages.success(request, f'Добавлено фотографий: {len(images)}.')
     return redirect('smuhammad:property_images', pk=property_obj.pk)
 
@@ -241,6 +260,26 @@ def delete_property_image(request, pk):
     """Удаление фотографии: чужое фото удалить нельзя."""
     image = get_object_or_404(PropertyImage, pk=pk, property__owner=request.user)
     property_pk = image.property_id
-    image.delete()
+    with transaction.atomic():
+        property_obj = get_object_or_404(Property.objects.select_for_update(), pk=property_pk, owner=request.user)
+        image = get_object_or_404(PropertyImage, pk=pk, property=property_obj)
+        image.delete()
+        if property_obj.status == PropertyStatus.APPROVED:
+            property_obj.status = PropertyStatus.PENDING
+            property_obj.save(update_fields=['status', 'updated_at'])
+            messages.info(request, 'После изменения фотографий объявление отправлено на повторную модерацию.')
     messages.success(request, 'Фотография удалена.')
     return redirect('smuhammad:property_images', pk=property_pk)
+
+
+@login_required(login_url=LOGIN_URL)
+@require_http_methods(['GET', 'POST'])
+def location_create(request):
+    if request.user.profile.role != 'owner':
+        raise PermissionDenied
+    form = LocationForm(request.POST if request.method == 'POST' else None)
+    if request.method == 'POST' and form.is_valid():
+        location = form.save()
+        messages.success(request, 'Адрес добавлен. Теперь заполните объявление.')
+        return redirect(reverse('smuhammad:property_create') + f'?location={location.pk}')
+    return render(request, 'smuhammad/location_form.html', {'form': form})

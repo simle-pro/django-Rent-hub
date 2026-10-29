@@ -4,6 +4,7 @@
 
 {% block content %}
   <h1>{% if property %}Изменить «{{ property.title }}»{% else %}Новое объявление{% endif %}</h1>
+  {% if not property %}<p>Сначала <a href="{% url 'smuhammad:location_create' %}">добавьте адрес жилья</a>, если его ещё нет в списке.</p>{% endif %}
 
   <form method="post">
     {% csrf_token %}

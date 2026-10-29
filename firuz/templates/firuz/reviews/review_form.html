@@ -1,0 +1,8 @@
+{% extends 'firuz/base.html' %}
+{% block content %}
+<h1>Отзыв: {{ property.title }}</h1>
+<form method="post" action="{% url 'firuz:review_create' property.pk %}">
+    {% csrf_token %}{{ form.as_p }}<button type="submit">Отправить отзыв</button>
+</form>
+<a href="{% url 'firuz:property_reviews' property.pk %}">Вернуться к отзывам</a>
+{% endblock %}

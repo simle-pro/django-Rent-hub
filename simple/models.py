@@ -42,6 +42,9 @@ class Booking(models.Model):
         verbose_name = 'Заявка на аренду'
         verbose_name_plural = 'Заявки на аренду'
         ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(condition=models.Q(start_date__lt=models.F('end_date')), name='booking_valid_date_range'),
+        ]
 
     def __str__(self):
         return f'{self.property_id}: {self.start_date} — {self.end_date}'

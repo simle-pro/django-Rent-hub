@@ -1,0 +1,8 @@
+{% extends 'firuz/base.html' %}
+{% block content %}
+<h1>Рассмотрение жалобы: {{ report.property.title }}</h1>
+{{ report.text|linebreaks }}
+<form method="post" action="{% url 'firuz:report_resolve' report.pk %}">
+    {% csrf_token %}{{ form.as_p }}<button type="submit">Завершить рассмотрение</button>
+</form>
+{% endblock %}

@@ -5,6 +5,7 @@ from . import views
 app_name = 'smuhammad'
 
 urlpatterns = [
+    path('locations/create/', views.location_create, name='location_create'),
     path('properties/', views.PropertyListView.as_view(), name='property_list'),
     path('properties/my/', views.MyPropertiesListView.as_view(), name='my_properties'),
     path('properties/create/', views.PropertyCreateView.as_view(), name='property_create'),
