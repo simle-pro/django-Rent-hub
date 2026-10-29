@@ -1,0 +1,16 @@
+{% extends 'simple/base.html' %}
+{% block title %}Мои заявки — RentHub{% endblock %}
+{% block content %}
+<h1>Мои заявки</h1>
+<ul>
+{% for booking in bookings %}
+    <li>
+        <a href="{% url 'simple:booking_detail' booking.pk %}">{{ booking.property.title }}</a>
+        — {{ booking.start_date }} — {{ booking.end_date }}
+        — {{ booking.get_status_display }}
+    </li>
+{% empty %}
+    <li>Вы ещё не подавали заявок.</li>
+{% endfor %}
+</ul>
+{% endblock %}
