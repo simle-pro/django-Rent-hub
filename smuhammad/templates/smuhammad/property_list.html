@@ -1,50 +1,13 @@
-{% extends "smuhammad/base.html" %}
-
-{% block title %}Каталог объявлений{% endblock %}
-
+{% extends 'base.html' %}
+{% block title %}Каталог объявлений — RentHub{% endblock %}
 {% block content %}
-  <h1>Каталог объявлений</h1>
-
-  <form method="get" action="{% url 'smuhammad:property_list' %}">
-    <input type="search" name="q" value="{{ q }}" placeholder="Заголовок, описание, адрес">
-    <select name="category">
-      <option value="">Все категории</option>
-      {% for category in categories %}
-        <option value="{{ category.pk }}" {% if selected_category == category.pk|stringformat:"s" %}selected{% endif %}>
-          {{ category.name }}
-        </option>
-      {% endfor %}
-    </select>
-    <button type="submit">Найти</button>
-  </form>
-
-  {% if properties %}
-    <div>
-      {% for property in properties %}
-        <article>
-          <h2><a href="{% url 'smuhammad:property_detail' property.pk %}">{{ property.title }}</a></h2>
-          {% if property.images.first %}
-            <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
-          {% endif %}
-          <p><strong>{{ property.price }} ₽ / сутки</strong></p>
-          <p>{{ property.location }} · {{ property.category }}</p>
-          <p>{{ property.description|truncatewords:30 }}</p>
-        </article>
-      {% endfor %}
-    </div>
-
-    {% if is_paginated %}
-      <nav>
-        {% if page_obj.has_previous %}
-          <a href="?q={{ q }}&amp;category={{ selected_category }}&amp;page={{ page_obj.previous_page_number }}">Назад</a>
-        {% endif %}
-        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-          <a href="?q={{ q }}&amp;category={{ selected_category }}&amp;page={{ page_obj.next_page_number }}">Вперёд</a>
-        {% endif %}
-      </nav>
-    {% endif %}
-  {% else %}
-    <p>Опубликованных объявлений не найдено.</p>
-  {% endif %}
+<div class="page-heading"><p class="eyebrow">ПРОСТРАНСТВО ДЛЯ ЖИЗНИ</p><h1>Каталог объявлений</h1><p>Только опубликованные варианты. Выберите свой следующий адрес.</p></div>
+<form method="get" action="{% url 'smuhammad:property_list' %}" class="home-search">
+    <label><span>Город, район или название</span><input type="search" name="q" value="{{ q }}" placeholder="Где вы хотите жить?"></label>
+    <label><span>Тип жилья</span><select name="category"><option value="">Все категории</option>{% for category in categories %}<option value="{{ category.pk }}" {% if selected_category == category.pk|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></label>
+    <button type="submit">Найти ↗</button>
+</form>
+{% if properties %}<div class="property-grid">{% for property in properties %}{% include 'includes/property_card.html' %}{% endfor %}</div>
+{% else %}<div class="empty-state"><span class="empty-icon">⌂</span><h3>Опубликованных объявлений не найдено.</h3><p>Попробуйте изменить поиск или вернитесь немного позже.</p></div>{% endif %}
+{% if is_paginated %}<nav class="pagination">{% if page_obj.has_previous %}<a class="button button-secondary" href="?q={{ q|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}<span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="button button-secondary" href="?q={{ q|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;page={{ page_obj.next_page_number }}">Вперёд</a>{% endif %}</nav>{% endif %}
 {% endblock %}

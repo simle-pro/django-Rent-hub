@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Добавить адрес — RentHub{% endblock %}
+{% block content %}
+<p class="eyebrow">НОВОЕ ОБЪЯВЛЕНИЕ</p><h1>Где находится ваше жильё?</h1>
+<p>Укажите город и настоящий адрес. Затем вы сможете выбрать его в объявлении.</p>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Сохранить адрес и продолжить ↗</button></form>
+{% endblock %}

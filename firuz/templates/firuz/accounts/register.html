@@ -1,9 +1,3 @@
-{% extends 'firuz/base.html' %}
+{% extends 'base.html' %}
 {% block title %}Регистрация — RentHub{% endblock %}
-{% block content %}
-<h1>Регистрация</h1>
-<form method="post">
-    {% csrf_token %}{{ form.as_p }}
-    <button type="submit">Зарегистрироваться</button>
-</form>
-{% endblock %}
+{% block content %}<section class="auth-layout"><aside class="auth-aside"><div><p class="eyebrow">НОВАЯ ГЛАВА НАЧИНАЕТСЯ ЗДЕСЬ</p><h2>Найдите дом.<br>Или помогите<br>его найти.</h2><p>Выберите роль арендатора или владельца и присоединяйтесь к RentHub.</p></div><span class="auth-house" aria-hidden="true">⌂</span></aside><div class="auth-content"><p class="eyebrow">ДАВАЙТЕ ЗНАКОМИТЬСЯ</p><h1>Создайте аккаунт</h1><form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Зарегистрироваться ↗</button></form><p class="auth-note">После регистрации подтвердите email по ссылке из письма.</p><p class="auth-note">Уже с нами? <a href="{% url 'firuz:login' %}">Войти</a></p></div></section>{% endblock %}

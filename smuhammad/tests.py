@@ -41,6 +41,8 @@ class PropertyTestCase(TestCase):
     def setUpTestData(cls):
         User = get_user_model()
         cls.owner = User.objects.create_user('owner', password='pass-12345')
+        cls.owner.profile.role = 'owner'
+        cls.owner.profile.save()
         cls.other_user = User.objects.create_user('other', password='pass-12345')
         cls.category = PropertyCategory.objects.create(name='Квартира')
         cls.location = Location.objects.create(city='Ташкент', address='ул. Амира Темура, 1')

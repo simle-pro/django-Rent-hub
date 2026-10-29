@@ -7,7 +7,7 @@
   <p><a href="{% url 'smuhammad:property_create' %}">Разместить новое объявление</a></p>
 
   {% if properties %}
-    <table>
+    <div class="table-wrap"><table>
       <tr>
         <th>Объявление</th>
         <th>Статус</th>
@@ -46,7 +46,7 @@
           </td>
         </tr>
       {% endfor %}
-    </table>
+    </table></div>
 
     {% if is_paginated %}
       <nav>

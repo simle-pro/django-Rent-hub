@@ -1,5 +1,6 @@
 from django import forms
 from django.utils import timezone
+from smuhammad.models import PropertyCategory
 
 from .models import Booking
 
@@ -26,6 +27,7 @@ class SearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['category'].widget = forms.Select(choices=[('', 'Любой тип жилья')] + list(PropertyCategory.objects.values_list('pk', 'name')))
         self.amenity_ids = []
         getlist = getattr(self.data, 'getlist', None)
         if getlist:

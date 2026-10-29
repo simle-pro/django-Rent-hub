@@ -1,25 +1,4 @@
-{% extends 'simple/base.html' %}
+{% extends 'base.html' %}
 {% block title %}Избранное — RentHub{% endblock %}
-{% block content %}
-<h1>Избранное</h1>
-<ul>
-{% for favorite in favorites %}
-    <li>
-        <h2><a href="{% url 'smuhammad:property_detail' favorite.property_id %}">{{ favorite.property.title }}</a></h2>
-        <p>{{ favorite.property.location }} — {{ favorite.property.price }} за сутки</p>
-        {% if favorite.property.status == 'approved' %}
-            <a href="{% url 'simple:booking_create' favorite.property_id %}">Подать заявку</a>
-        {% else %}
-            <p>Объект больше не публикуется.</p>
-        {% endif %}
-        <form method="post" action="{% url 'simple:favorite_toggle' favorite.property_id %}">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit">Убрать из избранного</button>
-        </form>
-    </li>
-{% empty %}
-    <li>В избранном пока пусто.</li>
-{% endfor %}
-</ul>
-{% endblock %}
+{% block content %}<div class="page-heading"><p class="eyebrow">МЕСТА, КОТОРЫЕ ПОНРАВИЛИСЬ</p><h1>Ваше избранное.</h1><p>Вернитесь к хорошим вариантам, когда будете готовы.</p></div>
+<div class="property-grid">{% for favorite in favorites %}<div>{% if favorite.property.is_public %}{% include 'includes/property_card.html' with property=favorite.property %}{% else %}<div class="panel"><h3>Объявление недоступно</h3><p class="muted">Объект больше не публикуется.</p></div>{% endif %}<form method="post" action="{% url 'simple:favorite_toggle' favorite.property_id %}" class="card-actions">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button-secondary" type="submit">Убрать из избранного</button></form></div>{% empty %}<div class="empty-state" style="grid-column:1/-1"><span class="empty-icon">♡</span><h3>В избранном пока пусто.</h3><p>Сохраняйте варианты, к которым хочется вернуться.</p><a class="button" href="{% url 'simple:search' %}">Найти жильё ↗</a></div>{% endfor %}</div>{% endblock %}

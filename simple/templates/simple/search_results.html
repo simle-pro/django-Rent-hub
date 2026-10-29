@@ -1,62 +1,25 @@
-{% extends 'simple/base.html' %}
-{% block title %}Поиск — RentHub{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Найти жильё — RentHub{% endblock %}
 {% block content %}
-<h1>Поиск жилья</h1>
-<form method="get" action="{% url 'simple:search' %}">
-    <p>{{ form.q.label }}: {{ form.q }}</p>
-    <p>{{ form.min_price.label }}: {{ form.min_price }} {{ form.max_price.label }}: {{ form.max_price }}</p>
-    <p>{{ form.category.label }}: {{ form.category }}</p>
-    <fieldset>
-        <legend>Удобства (требуются все выбранные)</legend>
-        {% for amenity in amenities %}
-            <label>
-                <input type="checkbox" name="amenities" value="{{ amenity.pk }}" {% if amenity.pk in form.amenity_ids %}checked{% endif %}>
-                {{ amenity.name }}
-            </label>
-        {% endfor %}
-    </fieldset>
-    <p>{{ form.sort.label }}: {{ form.sort }}</p>
-    <button type="submit">Найти</button>
+<div class="page-heading"><p class="eyebrow">ВАШ СЛЕДУЮЩИЙ АДРЕС</p><h1>Найдите место для себя.</h1><p>Город, бюджет и маленькие детали, из которых складывается дом.</p></div>
+<div class="filter-layout">
+<form class="search-filters" method="get" action="{% url 'simple:search' %}">
+    <h3>Ваши пожелания</h3>
+    {{ form.non_field_errors }}
+    <p><label for="{{ form.q.id_for_label }}">Город или название</label>{{ form.q }}{{ form.q.errors }}</p>
+    <p><label for="{{ form.category.id_for_label }}">Тип жилья</label>{{ form.category }}{{ form.category.errors }}</p>
+    <div class="range-fields"><p><label for="{{ form.min_price.id_for_label }}">Цена от, ₽</label>{{ form.min_price }}{{ form.min_price.errors }}</p><p><label for="{{ form.max_price.id_for_label }}">Цена до, ₽</label>{{ form.max_price }}{{ form.max_price.errors }}</p></div>
+    <fieldset><legend>Удобства — все выбранные</legend>{% for amenity in amenities %}<label class="check-label"><input type="checkbox" name="amenities" value="{{ amenity.pk }}" {% if amenity.pk in form.amenity_ids %}checked{% endif %}>{{ amenity.name }}</label>{% empty %}<span class="small-link">Удобства пока не добавлены</span>{% endfor %}</fieldset>
+    <p><label for="{{ form.sort.id_for_label }}">Порядок показа</label>{{ form.sort }}{{ form.sort.errors }}</p>
+    <button type="submit">Показать варианты ↗</button>
+    <p style="margin:12px 0 0;text-align:center"><a class="small-link" href="{% url 'simple:search' %}">Сбросить фильтры</a></p>
 </form>
-{% if form.errors %}<p>Некоторые фильтры некорректны и были проигнорированы.</p>{% endif %}
-<ul>
-{% for item in page_obj %}
-    <li>
-        <h2><a href="{% url 'smuhammad:property_detail' item.pk %}">{{ item.title }}</a></h2>
-        <p>{{ item.location }} — {{ item.price }} за сутки</p>
-        <p>{{ item.description }}</p>
-        <p>Тип: {{ item.category }}</p>
-        <p>Удобства: {% for amenity in item.amenities.all %}{{ amenity.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-        {% if user.is_authenticated %}
-            <form method="post" action="{% url 'simple:favorite_toggle' item.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                {% if item.pk in favorite_ids %}
-                    <button type="submit">Убрать из избранного</button>
-                {% else %}
-                    <button type="submit">В избранное</button>
-                {% endif %}
-            </form>
-            {% if user.profile.role == 'tenant' %}
-                <a href="{% url 'simple:booking_create' item.pk %}">Подать заявку</a>
-            {% endif %}
-        {% else %}
-            <a href="{% url 'firuz:login' %}?next={{ request.get_full_path }}">Войдите, чтобы подать заявку</a>
-        {% endif %}
-    </li>
-{% empty %}
-    <li>Ничего не найдено.</li>
-{% endfor %}
-</ul>
-{% if page_obj.has_other_pages %}
-<nav>
-    {% if page_obj.has_previous %}
-        <a href="?{% if search_querystring %}{{ search_querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
-    {% endif %}
-    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-    {% if page_obj.has_next %}
-        <a href="?{% if search_querystring %}{{ search_querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Вперёд</a>
-    {% endif %}
-</nav>
-{% endif %}
+<section>
+    <div class="results-heading"><p>Найдено вариантов: <strong>{{ page_obj.paginator.count }}</strong></p><span class="badge">Проверенные объявления</span></div>
+    {% if form.errors %}<div class="notice notice-error">Некоторые фильтры некорректны и были проигнорированы. Проверьте поля слева.</div>{% endif %}
+    {% if page_obj %}<div class="property-grid">{% for item in page_obj %}{% include 'includes/property_card.html' with property=item show_actions=True %}{% endfor %}</div>
+    {% else %}<div class="empty-state"><span class="empty-icon">⌂</span><h3>Пока нет подходящих вариантов</h3><p>Попробуйте другой город или расширьте диапазон цены.</p><a class="button button-secondary" href="{% url 'simple:search' %}">Посмотреть всё</a></div>{% endif %}
+    {% include 'includes/pagination.html' %}
+</section>
+</div>
 {% endblock %}

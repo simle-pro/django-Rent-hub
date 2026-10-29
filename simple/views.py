@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
@@ -27,7 +28,7 @@ def search(request):
     queryset = (
         Property.objects.filter(status='approved')
         .select_related('location', 'category', 'owner')
-        .prefetch_related('amenities')
+        .prefetch_related('amenities', 'images')
     )
     if form.is_valid():
         q = form.cleaned_data.get('q')
@@ -84,7 +85,7 @@ def favorite_toggle(request, property_id):
         Favorite.objects.get_or_create(user=request.user, property=property_obj)
         messages.success(request, 'Объект добавлен в избранное.')
     next_url = request.POST.get('next', '')
-    if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
+    if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}, require_https=request.is_secure()):
         return redirect(next_url)
     return redirect('simple:favorite_list')
 
@@ -94,7 +95,7 @@ def favorite_toggle(request, property_id):
 def favorite_list(request):
     favorites = Favorite.objects.filter(user=request.user).select_related(
         'property', 'property__location', 'property__category', 'property__owner'
-    ).prefetch_related('property__amenities')
+    ).prefetch_related('property__amenities', 'property__images')
     return render(request, 'simple/favorite_list.html', {'favorites': favorites})
 
 
@@ -108,7 +109,7 @@ def booking_create(request, property_id):
     if property_obj.owner_id == request.user.pk:
         messages.error(request, 'Нельзя подать заявку на собственное объявление.')
         return redirect('simple:search')
-    form = BookingForm(request.POST or None, property_obj=property_obj)
+    form = BookingForm(request.POST if request.method == 'POST' else None, property_obj=property_obj)
     if request.method == 'POST' and form.is_valid():
         booking = form.save(commit=False)
         booking.user = request.user
@@ -151,11 +152,14 @@ def booking_detail(request, pk):
 @require_POST
 def booking_cancel(request, pk):
     booking = get_object_or_404(Booking, pk=pk, user=request.user)
-    if booking.status not in (Booking.STATUS_PENDING, Booking.STATUS_APPROVED):
-        messages.error(request, 'Эту заявку нельзя отменить.')
-        return redirect('simple:booking_detail', pk=pk)
-    booking.status = Booking.STATUS_CANCELLED
-    booking.save(update_fields=['status'])
+    with transaction.atomic():
+        get_object_or_404(Property.objects.select_for_update(), pk=booking.property_id)
+        booking = get_object_or_404(Booking.objects.select_for_update(), pk=pk, user=request.user)
+        if booking.status not in (Booking.STATUS_PENDING, Booking.STATUS_APPROVED):
+            messages.error(request, 'Эту заявку нельзя отменить.')
+            return redirect('simple:booking_detail', pk=pk)
+        booking.status = Booking.STATUS_CANCELLED
+        booking.save(update_fields=['status'])
     messages.success(request, 'Заявка отменена.')
     return redirect('simple:my_bookings')
 
@@ -178,7 +182,13 @@ def booking_approve(request, pk):
     with transaction.atomic():
         property_obj = Property.objects.select_for_update().get(pk=booking.property_id)
         booking = Booking.objects.select_for_update().get(pk=pk)
-        if booking.status != Booking.STATUS_PENDING:
+        if property_obj.owner_id != request.user.pk:
+            raise Http404
+        if property_obj.status != 'approved':
+            messages.error(request, 'Объявление больше не опубликовано. Подтвердить заявку нельзя.')
+        elif booking.start_date < timezone.localdate():
+            messages.error(request, 'Дата начала аренды уже прошла.')
+        elif booking.status != Booking.STATUS_PENDING:
             messages.error(request, 'Подтвердить можно только ожидающую заявку.')
         elif Booking.has_approved_overlap(property_obj, booking.start_date, booking.end_date, exclude_pk=booking.pk):
             messages.error(request, 'Нельзя подтвердить: даты пересекаются с другой подтверждённой заявкой.')
@@ -196,6 +206,7 @@ def booking_reject(request, pk):
     if booking.property.owner_id != request.user.pk:
         raise Http404
     with transaction.atomic():
+        property_obj = get_object_or_404(Property.objects.select_for_update(), pk=booking.property_id, owner=request.user)
         booking = Booking.objects.select_for_update().get(pk=pk)
         if booking.status != Booking.STATUS_PENDING:
             messages.error(request, 'Отклонить можно только ожидающую заявку.')

@@ -1,0 +1,36 @@
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" href="{% url 'home' %}" aria-label="RentHub — главная"><span class="brand-mark" aria-hidden="true">⌂</span>Rent<span>Hub</span><i></i></a>
+        <nav class="main-nav" aria-label="Основная навигация">
+            <a href="{% url 'simple:search' %}" {% if request.resolver_match.namespace == 'simple' and request.resolver_match.url_name == 'search' %}aria-current="page"{% endif %}>Найти жильё</a>
+            <a href="{% url 'smuhammad:property_list' %}">Каталог</a>
+            <a href="{% url 'firuz:review_list' %}">Отзывы</a>
+        </nav>
+        <div class="account-nav">
+            {% if user.is_authenticated %}
+                <a class="account-link" href="{% url 'firuz:profile' %}"><span class="avatar avatar-small">{{ user.username|first|upper }}</span><span>{{ user.username }}</span></a>
+                <form method="post" action="{% url 'firuz:logout' %}" class="inline-form">{% csrf_token %}<button class="button button-quiet" type="submit">Выйти</button></form>
+            {% else %}
+                <a class="login-link" href="{% url 'firuz:login' %}">Войти</a>
+                <a class="button button-small" href="{% url 'firuz:register' %}">Начать <span aria-hidden="true">↗</span></a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+{% if user.is_authenticated %}
+<div class="workspace-nav"><nav class="container" aria-label="Личный кабинет">
+    <a href="{% url 'firuz:profile' %}">Мой кабинет</a>
+    {% if user.profile.role == 'owner' %}
+        <a href="{% url 'smuhammad:my_properties' %}">Мои объявления</a>
+        <a href="{% url 'smuhammad:property_create' %}">Разместить жильё</a>
+        <a href="{% url 'simple:received_bookings' %}">Входящие заявки</a>
+    {% else %}
+        <a href="{% url 'simple:my_bookings' %}">Мои заявки</a>
+    {% endif %}
+    <a href="{% url 'simple:favorite_list' %}">Избранное</a>
+    {% if perms.firuz.moderate_property %}
+        <a href="{% url 'firuz:pending_properties' %}">Модерация</a>
+        <a href="{% url 'firuz:property_reports' %}">Жалобы</a>
+    {% endif %}
+</nav></div>
+{% endif %}

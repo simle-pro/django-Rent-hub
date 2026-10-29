@@ -11,7 +11,7 @@
 
   <h2>Добавленные фотографии ({{ images|length }} из {{ max_images }})</h2>
   {% if images %}
-    <div>
+    <div class="media-grid">
       {% for image in images %}
         <div>
           <img src="{{ image.image.url }}" alt="Фотография объявления {{ property.title }}">

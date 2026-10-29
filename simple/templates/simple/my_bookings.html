@@ -1,16 +1,1 @@
-{% extends 'simple/base.html' %}
-{% block title %}Мои заявки — RentHub{% endblock %}
-{% block content %}
-<h1>Мои заявки</h1>
-<ul>
-{% for booking in bookings %}
-    <li>
-        <a href="{% url 'simple:booking_detail' booking.pk %}">{{ booking.property.title }}</a>
-        — {{ booking.start_date }} — {{ booking.end_date }}
-        — {{ booking.get_status_display }}
-    </li>
-{% empty %}
-    <li>Вы ещё не подавали заявок.</li>
-{% endfor %}
-</ul>
-{% endblock %}
+{% extends 'base.html' %}{% block title %}Мои заявки — RentHub{% endblock %}{% block content %}<div class="page-heading"><p class="eyebrow">ВАШИ ПЛАНЫ</p><h1>Мои заявки</h1><p>Следите за ответами владельцев и управляйте датами аренды.</p></div><ul class="booking-list">{% for booking in bookings %}<li class="booking-row"><div><h2><a href="{% url 'simple:booking_detail' booking.pk %}">{{ booking.property.title }}</a></h2><p>{{ booking.start_date }} — {{ booking.end_date }}</p></div><span class="badge badge-{{ booking.status }}">{{ booking.get_status_display }}</span><a class="circle-link" href="{% url 'simple:booking_detail' booking.pk %}" aria-label="Открыть заявку">↗</a></li>{% empty %}<li class="empty-state"><h3>Вы ещё не подавали заявок.</h3><p>Найдите жильё и выберите даты, которые вам подходят.</p><a class="button" href="{% url 'simple:search' %}">Перейти к поиску ↗</a></li>{% endfor %}</ul>{% endblock %}

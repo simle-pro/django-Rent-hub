@@ -1,0 +1,23 @@
+<article class="property-card">
+    <a class="property-cover" href="{{ property.get_absolute_url }}">
+        {% with photo=property.images.all|first %}
+            {% if photo %}<img src="{{ photo.image.url }}" alt="{{ property.title }}" loading="lazy">{% else %}<div class="property-placeholder"><span aria-hidden="true">⌂</span><small>Фотографии скоро появятся</small></div>{% endif %}
+        {% endwith %}
+        <span class="cover-badge">{{ property.category }}</span>
+    </a>
+    <div class="property-card-body">
+        <p class="property-location">↗ {{ property.location.city }}</p>
+        <h3><a href="{{ property.get_absolute_url }}">{{ property.title }}</a></h3>
+        <p class="muted">{{ property.location.address }}</p>
+        <div class="property-card-bottom"><p><strong>{{ property.price|floatformat:'-2' }} ₽</strong><span> / сутки</span></p><a class="circle-link" href="{{ property.get_absolute_url }}" aria-label="Подробнее об объявлении">↗</a></div>
+        {% if show_actions and user.is_authenticated %}
+        <div class="card-actions">
+            <form method="post" action="{% url 'simple:favorite_toggle' property.pk %}">
+                {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="button-secondary">{% if property.pk in favorite_ids %}Убрать из избранного{% else %}В избранное{% endif %}</button>
+            </form>
+            {% if user.profile.role == 'tenant' and user.pk != property.owner_id %}<a class="small-link" href="{% url 'simple:booking_create' property.pk %}">Подать заявку ↗</a>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</article>
