@@ -1,0 +1,26 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Жалобы — RentHub{% endblock %}
+{% block content %}
+<h1>Жалобы на объявления</h1>
+{% for report in page_obj %}
+<article>
+    <h2><a href="{{ report.property.get_absolute_url }}">{{ report.property.title }}</a></h2>
+    <p>{{ report.user.username }} — {{ report.get_reason_display }} — {{ report.get_status_display }}</p>
+    {{ report.text|linebreaks }}
+    {% if report.status == 'pending' %}
+        <form method="post" action="{% url 'firuz:report_resolve' report.pk %}">
+            {% csrf_token %}
+            <label>Решение <textarea name="resolution" rows="3" maxlength="2000" required></textarea></label>
+            {% if report.property.is_public %}
+                <label><input type="checkbox" name="hide_property"> Скрыть объявление</label>
+            {% endif %}
+            <button type="submit">Завершить рассмотрение</button>
+        </form>
+    {% else %}
+        {{ report.resolution|linebreaks }}
+        <p>Рассмотрел: {{ report.resolved_by.username|default:'Удалённый пользователь' }}. {{ report.resolved_at }}</p>
+    {% endif %}
+</article>
+{% empty %}<p>Жалоб нет.</p>{% endfor %}
+{% include 'firuz/includes/pagination.html' %}
+{% endblock %}

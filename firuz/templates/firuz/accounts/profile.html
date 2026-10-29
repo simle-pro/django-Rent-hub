@@ -9,11 +9,41 @@
 {{ profile.bio|linebreaks }}
 {% if is_moderator %}
     <h2>Кабинет модератора</h2>
+    <p><a href="{% url 'firuz:pending_properties' %}">Очередь модерации</a></p>
+    <p><a href="{% url 'firuz:property_reports' %}">Рассмотрение жалоб</a></p>
 {% elif profile.role == 'owner' %}
     <h2>Кабинет владельца</h2>
     <a href="{% url 'firuz:public_profile' user.pk %}">Публичная страница</a>
+    <p><a href="{% url 'smuhammad:my_properties' %}">Мои объявления</a></p>
+    <p><a href="{% url 'smuhammad:property_create' %}">Разместить объявление</a></p>
+    <p><a href="{% url 'simple:received_bookings' %}">Входящие заявки</a></p>
 {% else %}
     <h2>Кабинет арендатора</h2>
+    <p><a href="{% url 'simple:search' %}">Найти жильё</a></p>
+    <p><a href="{% url 'simple:favorite_list' %}">Избранное</a></p>
+    <p><a href="{% url 'simple:my_bookings' %}">Мои заявки</a></p>
 {% endif %}
 <a href="{% url 'firuz:profile_edit' %}">Редактировать профиль</a>
+<h2>Мои последние отзывы</h2>
+{% for review in reviews %}
+    <article>
+        <h3>{{ review.property.title }} — {{ review.rating }}/5</h3>
+        {{ review.text|linebreaks }}
+        {% if review.property.is_public %}
+            <a href="{% url 'firuz:property_reviews' review.property_id %}">Все отзывы</a>
+        {% endif %}
+        <form method="post" action="{% url 'firuz:review_delete' review.pk %}">
+            {% csrf_token %}<button type="submit">Удалить мой отзыв</button>
+        </form>
+    </article>
+{% empty %}<p>Вы ещё не оставляли отзывов.</p>{% endfor %}
+<h2>Мои последние жалобы</h2>
+{% for report in reports %}
+    <article>
+        <h3>{{ report.property.title }}</h3>
+        <p>{{ report.get_reason_display }} — {{ report.get_status_display }}</p>
+        {{ report.text|linebreaks }}
+        {% if report.resolution %}<p>Решение:</p>{{ report.resolution|linebreaks }}{% endif %}
+    </article>
+{% empty %}<p>Вы ещё не отправляли жалоб.</p>{% endfor %}
 {% endblock %}

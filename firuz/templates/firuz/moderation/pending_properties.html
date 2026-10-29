@@ -1,0 +1,21 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Очередь модерации — RentHub{% endblock %}
+{% block content %}
+<h1>Очередь модерации</h1>
+{% for property in page_obj %}
+<article>
+    <h2><a href="{{ property.get_absolute_url }}">{{ property.title }}</a></h2>
+    <p>Владелец: {{ property.owner.username }}. {{ property.location }}. {{ property.price }} ₽ / сутки</p>
+    {{ property.description|linebreaks }}
+    <form method="post" action="{% url 'firuz:property_approve' property.pk %}">
+        {% csrf_token %}<button type="submit">Одобрить</button>
+    </form>
+    <form method="post" action="{% url 'firuz:property_reject' property.pk %}">
+        {% csrf_token %}
+        <label>Причина отклонения <textarea name="reason" rows="3" maxlength="2000" required></textarea></label>
+        <button type="submit">Отклонить</button>
+    </form>
+</article>
+{% empty %}<p>Нет объявлений для рассмотрения.</p>{% endfor %}
+{% include 'firuz/includes/pagination.html' %}
+{% endblock %}

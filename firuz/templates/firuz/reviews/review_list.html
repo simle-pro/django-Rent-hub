@@ -1,0 +1,14 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Отзывы об объявлениях — RentHub{% endblock %}
+{% block content %}
+<h1>Отзывы об объявлениях</h1>
+{% for property in page_obj %}
+<article>
+    <h2><a href="{% url 'firuz:property_reviews' property.pk %}">{{ property.title }}</a></h2>
+    <p>{{ property.location }} — {{ property.price }} ₽ / сутки</p>
+    <a href="{{ property.get_absolute_url }}">Объявление</a>
+    <a href="{% url 'firuz:public_profile' property.owner_id %}">Владелец</a>
+</article>
+{% empty %}<p>Опубликованных объявлений пока нет.</p>{% endfor %}
+{% include 'firuz/includes/pagination.html' %}
+{% endblock %}

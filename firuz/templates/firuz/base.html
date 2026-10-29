@@ -9,6 +9,9 @@
     <header>
         <a href="{% url 'firuz:home' %}">RentHub</a>
         <nav>
+            <a href="{% url 'smuhammad:property_list' %}">Каталог</a>
+            <a href="{% url 'simple:search' %}">Поиск</a>
+            <a href="{% url 'firuz:review_list' %}">Отзывы об объявлениях</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'firuz:profile' %}">Личный кабинет</a>
                 <form method="post" action="{% url 'firuz:logout' %}">

@@ -1,0 +1,7 @@
+{% extends 'firuz/base.html' %}
+{% block content %}
+<h1>Отклонение: {{ property.title }}</h1>
+<form method="post" action="{% url 'firuz:property_reject' property.pk %}">
+    {% csrf_token %}{{ form.as_p }}<button type="submit">Отклонить</button>
+</form>
+{% endblock %}
