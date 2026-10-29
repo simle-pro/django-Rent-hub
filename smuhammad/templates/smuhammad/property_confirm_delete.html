@@ -1,0 +1,14 @@
+{% extends "smuhammad/base.html" %}
+
+{% block title %}Удалить объявление{% endblock %}
+
+{% block content %}
+  <h1>Удалить объявление?</h1>
+  <p>Объявление <strong>«{{ property.title }}»</strong> и его фотографии будут удалены безвозвратно.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Да, удалить</button>
+    <a href="{% url 'smuhammad:property_detail' property.pk %}">Отмена</a>
+  </form>
+{% endblock %}

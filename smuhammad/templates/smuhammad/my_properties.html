@@ -1,0 +1,65 @@
+{% extends "smuhammad/base.html" %}
+
+{% block title %}Мои объявления{% endblock %}
+
+{% block content %}
+  <h1>Мои объявления</h1>
+  <p><a href="{% url 'smuhammad:property_create' %}">Разместить новое объявление</a></p>
+
+  {% if properties %}
+    <table>
+      <tr>
+        <th>Объявление</th>
+        <th>Статус</th>
+        <th>Цена</th>
+        <th>Обновлено</th>
+        <th>Действия</th>
+      </tr>
+      {% for property in properties %}
+        <tr>
+          <td>
+            <a href="{% url 'smuhammad:property_detail' property.pk %}">{{ property.title }}</a><br>
+            {{ property.category }} · {{ property.location }}
+            {% if property.status == 'rejected' and property.moderation_reason %}
+              <br><small>Причина отклонения: {{ property.moderation_reason }}</small>
+            {% endif %}
+          </td>
+          <td>{{ property.get_status_display }}</td>
+          <td>{{ property.price }} ₽</td>
+          <td>{{ property.updated_at|date:"d.m.Y H:i" }}</td>
+          <td>
+            <a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить</a>
+            · <a href="{% url 'smuhammad:property_images' property.pk %}">Фото</a>
+            · <a href="{% url 'smuhammad:property_delete' property.pk %}">Удалить</a>
+            {% if property.status == 'draft' or property.status == 'rejected' or property.status == 'hidden' %}
+              <form method="post" action="{% url 'smuhammad:property_submit' property.pk %}">
+                {% csrf_token %}
+                <button type="submit">Отправить на модерацию</button>
+              </form>
+            {% endif %}
+            {% if property.status == 'approved' or property.status == 'pending' %}
+              <form method="post" action="{% url 'smuhammad:property_hide' property.pk %}">
+                {% csrf_token %}
+                <button type="submit">Скрыть</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    {% if is_paginated %}
+      <nav>
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+        {% endif %}
+        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p>У вас пока нет объявлений.</p>
+  {% endif %}
+{% endblock %}

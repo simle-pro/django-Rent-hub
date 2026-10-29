@@ -1,0 +1,50 @@
+{% extends "smuhammad/base.html" %}
+
+{% block title %}Каталог объявлений{% endblock %}
+
+{% block content %}
+  <h1>Каталог объявлений</h1>
+
+  <form method="get" action="{% url 'smuhammad:property_list' %}">
+    <input type="search" name="q" value="{{ q }}" placeholder="Заголовок, описание, адрес">
+    <select name="category">
+      <option value="">Все категории</option>
+      {% for category in categories %}
+        <option value="{{ category.pk }}" {% if selected_category == category.pk|stringformat:"s" %}selected{% endif %}>
+          {{ category.name }}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="submit">Найти</button>
+  </form>
+
+  {% if properties %}
+    <div>
+      {% for property in properties %}
+        <article>
+          <h2><a href="{% url 'smuhammad:property_detail' property.pk %}">{{ property.title }}</a></h2>
+          {% if property.images.first %}
+            <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
+          {% endif %}
+          <p><strong>{{ property.price }} ₽ / сутки</strong></p>
+          <p>{{ property.location }} · {{ property.category }}</p>
+          <p>{{ property.description|truncatewords:30 }}</p>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <nav>
+        {% if page_obj.has_previous %}
+          <a href="?q={{ q }}&amp;category={{ selected_category }}&amp;page={{ page_obj.previous_page_number }}">Назад</a>
+        {% endif %}
+        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?q={{ q }}&amp;category={{ selected_category }}&amp;page={{ page_obj.next_page_number }}">Вперёд</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p>Опубликованных объявлений не найдено.</p>
+  {% endif %}
+{% endblock %}
