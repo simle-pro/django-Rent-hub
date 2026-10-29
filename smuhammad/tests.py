@@ -172,7 +172,7 @@ class PropertyCreateEditDeleteTests(PropertyTestCase):
         property_obj = Property.objects.get()
         self.assertRedirects(
             response,
-            reverse('smuhammad:property_detail', args=[property_obj.pk]),
+            reverse('smuhammad:property_images', args=[property_obj.pk]),
         )
         self.assertEqual(property_obj.owner, self.owner)
         self.assertEqual(property_obj.status, PropertyStatus.DRAFT)

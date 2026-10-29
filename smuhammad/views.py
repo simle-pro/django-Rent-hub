@@ -92,7 +92,7 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
             self.request,
             'Объявление сохранено как черновик. Добавьте фотографии и отправьте на модерацию.',
         )
-        return redirect(property_obj.get_absolute_url())
+        return redirect('smuhammad:property_images', pk=property_obj.pk)
 
 
 class PropertyUpdateView(LoginRequiredMixin, UpdateView):
