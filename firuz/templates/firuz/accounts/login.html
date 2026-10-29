@@ -1,0 +1,10 @@
+{% extends 'firuz/base.html' %}
+{% block title %}Вход — RentHub{% endblock %}
+{% block content %}
+<h1>Вход</h1>
+<form method="post">
+    {% csrf_token %}{{ form.as_p }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit">Войти</button>
+</form>
+{% endblock %}
