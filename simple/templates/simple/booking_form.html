@@ -1,0 +1,13 @@
+{% extends 'simple/base.html' %}
+{% block title %}Заявка на аренду — RentHub{% endblock %}
+{% block content %}
+<h1>Заявка на аренду</h1>
+<h2>{{ property_obj.title }}</h2>
+<p>{{ property_obj.location }} — {{ property_obj.price }} за сутки</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Отправить заявку</button>
+</form>
+<a href="{% url 'simple:search' %}">Назад к поиску</a>
+{% endblock %}

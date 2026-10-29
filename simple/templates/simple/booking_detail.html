@@ -1,0 +1,27 @@
+{% extends 'simple/base.html' %}
+{% block title %}Заявка № {{ booking.pk }} — RentHub{% endblock %}
+{% block content %}
+<h1>Заявка № {{ booking.pk }}</h1>
+<p>Объект: {{ booking.property.title }}</p>
+<p>Арендатор: {{ booking.user.username }}</p>
+<p>Владелец: {{ booking.property.owner.username }}</p>
+<p>Даты: {{ booking.start_date }} — {{ booking.end_date }}</p>
+<p>Статус: {{ booking.get_status_display }}</p>
+<p>Создана: {{ booking.created_at }}</p>
+{% if can_cancel %}
+    <form method="post" action="{% url 'simple:booking_cancel' booking.pk %}">
+        {% csrf_token %}
+        <button type="submit">Отменить заявку</button>
+    </form>
+{% endif %}
+{% if can_approve %}
+    <form method="post" action="{% url 'simple:booking_approve' booking.pk %}">
+        {% csrf_token %}
+        <button type="submit">Подтвердить</button>
+    </form>
+    <form method="post" action="{% url 'simple:booking_reject' booking.pk %}">
+        {% csrf_token %}
+        <button type="submit">Отклонить</button>
+    </form>
+{% endif %}
+{% endblock %}
