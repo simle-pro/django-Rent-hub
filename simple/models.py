@@ -4,7 +4,7 @@ from django.db import models
 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites')
-    property = models.ForeignKey('firuz.Property', on_delete=models.CASCADE, related_name='favorites')
+    property = models.ForeignKey('smuhammad.Property', on_delete=models.CASCADE, related_name='favorites')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -32,7 +32,7 @@ class Booking(models.Model):
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings')
-    property = models.ForeignKey('firuz.Property', on_delete=models.CASCADE, related_name='bookings')
+    property = models.ForeignKey('smuhammad.Property', on_delete=models.CASCADE, related_name='bookings')
     start_date = models.DateField('Дата начала')
     end_date = models.DateField('Дата окончания')
     status = models.CharField('Статус', max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)

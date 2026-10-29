@@ -6,7 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from firuz.models import Amenity, Location, Property, PropertyCategory
+from smuhammad.models import Amenity, Location, Property, PropertyCategory
 
 from .models import Booking, Favorite
 
@@ -20,7 +20,7 @@ class SimpleBaseTestCase(TestCase):
         self.tenant = user_model.objects.create_user('tenant1', password='RentHub-Test-9!')
         self.other = user_model.objects.create_user('tenant2', password='RentHub-Test-9!')
         self.category = PropertyCategory.objects.create(name='Квартира')
-        self.location = Location.objects.create(name='Душанбе')
+        self.location = Location.objects.create(city='Душанбе', address='Рудаки 1')
         self.wifi = Amenity.objects.create(name='Wi-Fi')
         self.parking = Amenity.objects.create(name='Парковка')
         self.property = self.make_property('Квартира в центре', status='approved')
