@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from firuz.models import Amenity, Property
+from smuhammad.models import Amenity, Property
 
 from .forms import BookingForm, SearchForm, SORT_DIRECTIONS
 from .models import Booking, Favorite
@@ -32,7 +32,11 @@ def search(request):
     if form.is_valid():
         q = form.cleaned_data.get('q')
         if q:
-            queryset = queryset.filter(Q(title__icontains=q) | Q(location__name__icontains=q))
+            queryset = queryset.filter(
+                Q(title__icontains=q)
+                | Q(location__city__icontains=q)
+                | Q(location__address__icontains=q)
+            )
         min_price = form.cleaned_data.get('min_price')
         if min_price is not None:
             queryset = queryset.filter(price__gte=min_price)

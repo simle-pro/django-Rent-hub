@@ -5,7 +5,7 @@
 <ul>
 {% for favorite in favorites %}
     <li>
-        <h2>{{ favorite.property.title }}</h2>
+        <h2><a href="{% url 'smuhammad:property_detail' favorite.property_id %}">{{ favorite.property.title }}</a></h2>
         <p>{{ favorite.property.location }} — {{ favorite.property.price }} за сутки</p>
         {% if favorite.property.status == 'approved' %}
             <a href="{% url 'simple:booking_create' favorite.property_id %}">Подать заявку</a>

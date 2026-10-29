@@ -22,7 +22,7 @@
 <ul>
 {% for item in page_obj %}
     <li>
-        <h2>{{ item.title }}</h2>
+        <h2><a href="{% url 'smuhammad:property_detail' item.pk %}">{{ item.title }}</a></h2>
         <p>{{ item.location }} — {{ item.price }} за сутки</p>
         <p>{{ item.description }}</p>
         <p>Тип: {{ item.category }}</p>
