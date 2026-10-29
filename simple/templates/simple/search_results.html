@@ -1,0 +1,62 @@
+{% extends 'simple/base.html' %}
+{% block title %}Поиск — RentHub{% endblock %}
+{% block content %}
+<h1>Поиск жилья</h1>
+<form method="get" action="{% url 'simple:search' %}">
+    <p>{{ form.q.label }}: {{ form.q }}</p>
+    <p>{{ form.min_price.label }}: {{ form.min_price }} {{ form.max_price.label }}: {{ form.max_price }}</p>
+    <p>{{ form.category.label }}: {{ form.category }}</p>
+    <fieldset>
+        <legend>Удобства (требуются все выбранные)</legend>
+        {% for amenity in amenities %}
+            <label>
+                <input type="checkbox" name="amenities" value="{{ amenity.pk }}" {% if amenity.pk in form.amenity_ids %}checked{% endif %}>
+                {{ amenity.name }}
+            </label>
+        {% endfor %}
+    </fieldset>
+    <p>{{ form.sort.label }}: {{ form.sort }}</p>
+    <button type="submit">Найти</button>
+</form>
+{% if form.errors %}<p>Некоторые фильтры некорректны и были проигнорированы.</p>{% endif %}
+<ul>
+{% for item in page_obj %}
+    <li>
+        <h2>{{ item.title }}</h2>
+        <p>{{ item.location }} — {{ item.price }} за сутки</p>
+        <p>{{ item.description }}</p>
+        <p>Тип: {{ item.category }}</p>
+        <p>Удобства: {% for amenity in item.amenities.all %}{{ amenity.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'simple:favorite_toggle' item.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                {% if item.pk in favorite_ids %}
+                    <button type="submit">Убрать из избранного</button>
+                {% else %}
+                    <button type="submit">В избранное</button>
+                {% endif %}
+            </form>
+            {% if user.profile.role == 'tenant' %}
+                <a href="{% url 'simple:booking_create' item.pk %}">Подать заявку</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'firuz:login' %}?next={{ request.get_full_path }}">Войдите, чтобы подать заявку</a>
+        {% endif %}
+    </li>
+{% empty %}
+    <li>Ничего не найдено.</li>
+{% endfor %}
+</ul>
+{% if page_obj.has_other_pages %}
+<nav>
+    {% if page_obj.has_previous %}
+        <a href="?{% if search_querystring %}{{ search_querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
+    {% endif %}
+    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    {% if page_obj.has_next %}
+        <a href="?{% if search_querystring %}{{ search_querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Вперёд</a>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}
