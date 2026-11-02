@@ -3,12 +3,12 @@
 {% block title %}Удалить объявление{% endblock %}
 
 {% block content %}
-  <h1>Удалить объявление?</h1>
+  <section class="promo"><h1>Удалить объявление?</h1></section>
   <p>Объявление <strong>«{{ property.title }}»</strong> и его фотографии будут удалены безвозвратно.</p>
 
-  <form method="post">
+  <form method="post" class="glass shard">
     {% csrf_token %}
-    <button type="submit">Да, удалить</button>
+    <button type="submit" class="btn danger">Да, удалить</button>
     <a href="{% url 'smuhammad:property_detail' property.pk %}">Отмена</a>
   </form>
 {% endblock %}

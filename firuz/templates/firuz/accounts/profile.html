@@ -1,8 +1,8 @@
 {% extends 'firuz/base.html' %}
 {% block title %}Личный кабинет — RentHub{% endblock %}
 {% block content %}
-<h1>Личный кабинет</h1>
-<p>{{ user.username }}</p>
+<section class="promo"><h1>Личный <span class="accent">кабинет</span></h1></section>
+<div class="glass"><p><b>{{ user.username }}</b></p>
 <p>{{ user.get_full_name }}</p>
 <p>{{ user.email }}</p>
 <p>{{ profile.phone }}</p>
@@ -15,5 +15,6 @@
 {% else %}
     <h2>Кабинет арендатора</h2>
 {% endif %}
-<a href="{% url 'firuz:profile_edit' %}">Редактировать профиль</a>
+<a class="btn" href="{% url 'firuz:profile_edit' %}">Редактировать профиль</a>
+</div>
 {% endblock %}

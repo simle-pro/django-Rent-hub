@@ -24,15 +24,21 @@ def register_user(request):
     if request.method == 'POST' and form.is_valid():
         with transaction.atomic():
             user = form.save(commit=False)
-            user.is_active = False
+            # В dev аккаунт активен сразу: письмо уходит в консоль runserver,
+            # иначе новый пользователь не сможет войти, не открыв ссылку.
+            user.is_active = settings.DEBUG
             user.save()
             user.profile.role = form.cleaned_data['role']
             user.profile.save()
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-            link = request.build_absolute_uri(reverse('firuz:activate', kwargs={'uidb64': uid, 'token': token}))
-            send_mail('Подтверждение email RentHub', f'Подтвердите email по ссылке:\n{link}', settings.DEFAULT_FROM_EMAIL, [user.email])
-        messages.success(request, 'Письмо подтверждения отправлено. Откройте ссылку из письма.')
+            if not settings.DEBUG:
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                link = request.build_absolute_uri(reverse('firuz:activate', kwargs={'uidb64': uid, 'token': token}))
+                send_mail('Подтверждение email RentHub', f'Подтвердите email по ссылке:\n{link}', settings.DEFAULT_FROM_EMAIL, [user.email])
+        if settings.DEBUG:
+            messages.success(request, 'Регистрация завершена (dev-режим). Теперь можно войти.')
+        else:
+            messages.success(request, 'Письмо подтверждения отправлено. Откройте ссылку из письма.')
         return redirect('firuz:login')
     return render(request, 'firuz/accounts/register.html', {'form': form})
 
@@ -61,6 +67,10 @@ def login_user(request):
     if request.user.is_authenticated:
         return redirect('firuz:profile')
     form = AuthenticationForm(request, data=request.POST if request.method == 'POST' else None)
+    form.fields['username'].label = 'Имя пользователя'
+    form.fields['username'].widget.attrs.update({'placeholder': 'username', 'autocomplete': 'username'})
+    form.fields['password'].label = 'Пароль'
+    form.fields['password'].widget.attrs.update({'placeholder': 'Пароль', 'autocomplete': 'current-password'})
     next_url = request.POST.get('next', request.GET.get('next', ''))
     if request.method == 'POST' and form.is_valid():
         login(request, form.get_user())

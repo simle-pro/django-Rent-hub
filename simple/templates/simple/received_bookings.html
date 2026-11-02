@@ -1,8 +1,8 @@
 {% extends 'simple/base.html' %}
 {% block title %}Заявки мне — RentHub{% endblock %}
 {% block content %}
-<h1>Заявки на мои объекты</h1>
-<ul>
+<section class="promo"><h1>Заявки на мои объекты</h1></section>
+<ul class="card-list">
 {% for booking in bookings %}
     <li>
         <a href="{% url 'simple:booking_detail' booking.pk %}">{{ booking.property.title }}</a>
@@ -11,7 +11,7 @@
         — {{ booking.get_status_display }}
     </li>
 {% empty %}
-    <li>Заявок на ваши объекты пока нет.</li>
+    <li class="empty">Заявок на ваши объекты пока нет.</li>
 {% endfor %}
 </ul>
 {% endblock %}

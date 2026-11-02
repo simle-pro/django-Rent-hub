@@ -3,9 +3,13 @@
 {% block title %}Каталог объявлений{% endblock %}
 
 {% block content %}
-  <h1>Каталог объявлений</h1>
+  <section class="promo">
+    <h1>Каталог <span class="accent">объявлений</span></h1>
+    <p>Странное стекло, прикольные карточки и живые анимации. Ищите жильё здесь.</p>
+    <div class="ticker"><span>RentHub • стекло • анимации • аренда • жильё • прикольно • RentHub • стекло • анимации • аренда • жильё • прикольно • </span></div>
+  </section>
 
-  <form method="get" action="{% url 'smuhammad:property_list' %}">
+  <form method="get" class="glass" action="{% url 'smuhammad:property_list' %}">
     <input type="search" name="q" value="{{ q }}" placeholder="Заголовок, описание, адрес">
     <select name="category">
       <option value="">Все категории</option>
@@ -19,22 +23,23 @@
   </form>
 
   {% if properties %}
-    <div>
+    <div class="card-grid">
       {% for property in properties %}
-        <article>
+        <article class="glass">
           <h2><a href="{% url 'smuhammad:property_detail' property.pk %}">{{ property.title }}</a></h2>
           {% if property.images.first %}
-            <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
+            <img class="property-img" src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
           {% endif %}
           <p><strong>{{ property.price }} ₽ / сутки</strong></p>
           <p>{{ property.location }} · {{ property.category }}</p>
           <p>{{ property.description|truncatewords:30 }}</p>
+          <a class="btn" href="{% url 'smuhammad:property_detail' property.pk %}">Смотреть →</a>
         </article>
       {% endfor %}
     </div>
 
     {% if is_paginated %}
-      <nav>
+      <nav class="pagination">
         {% if page_obj.has_previous %}
           <a href="?q={{ q }}&amp;category={{ selected_category }}&amp;page={{ page_obj.previous_page_number }}">Назад</a>
         {% endif %}
@@ -45,6 +50,6 @@
       </nav>
     {% endif %}
   {% else %}
-    <p>Опубликованных объявлений не найдено.</p>
+    <div class="empty">Опубликованных объявлений не найдено.</div>
   {% endif %}
 {% endblock %}

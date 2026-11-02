@@ -1,27 +1,27 @@
 {% extends 'simple/base.html' %}
 {% block title %}Заявка № {{ booking.pk }} — RentHub{% endblock %}
 {% block content %}
-<h1>Заявка № {{ booking.pk }}</h1>
+<section class="promo"><h1>Заявка № {{ booking.pk }}</h1><p><span class="pill {% if booking.status == 'approved' %}approved{% elif booking.status == 'pending' %}pending{% elif booking.status == 'rejected' %}rejected{% else %}cancelled{% endif %}">{{ booking.get_status_display }}</span></p></section>
 <p>Объект: {{ booking.property.title }}</p>
 <p>Арендатор: {{ booking.user.username }}</p>
 <p>Владелец: {{ booking.property.owner.username }}</p>
 <p>Даты: {{ booking.start_date }} — {{ booking.end_date }}</p>
-<p>Статус: {{ booking.get_status_display }}</p>
+
 <p>Создана: {{ booking.created_at }}</p>
 {% if can_cancel %}
     <form method="post" action="{% url 'simple:booking_cancel' booking.pk %}">
         {% csrf_token %}
-        <button type="submit">Отменить заявку</button>
+        <button type="submit" class="btn danger">Отменить заявку</button>
     </form>
 {% endif %}
 {% if can_approve %}
     <form method="post" action="{% url 'simple:booking_approve' booking.pk %}">
         {% csrf_token %}
-        <button type="submit">Подтвердить</button>
+        <button type="submit" class="btn">Подтвердить</button>
     </form>
     <form method="post" action="{% url 'simple:booking_reject' booking.pk %}">
         {% csrf_token %}
-        <button type="submit">Отклонить</button>
+        <button type="submit" class="btn danger">Отклонить</button>
     </form>
 {% endif %}
 {% endblock %}

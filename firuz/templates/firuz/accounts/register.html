@@ -1,9 +1,14 @@
 {% extends 'firuz/base.html' %}
 {% block title %}Регистрация — RentHub{% endblock %}
 {% block content %}
-<h1>Регистрация</h1>
-<form method="post">
-    {% csrf_token %}{{ form.as_p }}
+<section class="promo">
+    <h1>Регистрация в <span class="accent">RentHub</span></h1>
+    <p>Придумайте имя пользователя, укажите email и выберите роль.</p>
+</section>
+<form method="post" class="glass">
+    {% csrf_token %}
+    {{ form.as_p }}
     <button type="submit">Зарегистрироваться</button>
+    <p class="auth-switch">Уже есть аккаунт? <a href="{% url 'firuz:login' %}">Войти →</a></p>
 </form>
 {% endblock %}

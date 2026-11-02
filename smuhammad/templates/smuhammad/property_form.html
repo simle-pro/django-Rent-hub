@@ -5,7 +5,7 @@
 {% block content %}
   <h1>{% if property %}Изменить «{{ property.title }}»{% else %}Новое объявление{% endif %}</h1>
 
-  <form method="post">
+  <form method="post" class="glass">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Сохранить</button>

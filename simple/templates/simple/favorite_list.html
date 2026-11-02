@@ -1,8 +1,8 @@
 {% extends 'simple/base.html' %}
 {% block title %}Избранное — RentHub{% endblock %}
 {% block content %}
-<h1>Избранное</h1>
-<ul>
+<section class="promo"><h1>Избранное</h1></section>
+<ul class="card-list">
 {% for favorite in favorites %}
     <li>
         <h2>{{ favorite.property.title }}</h2>
@@ -19,7 +19,7 @@
         </form>
     </li>
 {% empty %}
-    <li>В избранном пока пусто.</li>
+    <li class="empty">В избранном пока пусто.</li>
 {% endfor %}
 </ul>
 {% endblock %}

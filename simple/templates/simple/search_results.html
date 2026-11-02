@@ -1,8 +1,12 @@
 {% extends 'simple/base.html' %}
 {% block title %}Поиск — RentHub{% endblock %}
 {% block content %}
-<h1>Поиск жилья</h1>
-<form method="get" action="{% url 'simple:search' %}">
+<section class="promo">
+  <h1>Поиск <span class="accent">жилья</span></h1>
+  <p>Фильтры, удобства, сортировка — всё в одном стеклянном блоке.</p>
+  <div class="ticker"><span>ищи • фильтруй • бронируй • ищи • фильтруй • бронируй • ищи • фильтруй • бронируй • </span></div>
+</section>
+<form method="get" class="glass" action="{% url 'simple:search' %}">
     <p>{{ form.q.label }}: {{ form.q }}</p>
     <p>{{ form.min_price.label }}: {{ form.min_price }} {{ form.max_price.label }}: {{ form.max_price }}</p>
     <p>{{ form.category.label }}: {{ form.category }}</p>
@@ -19,7 +23,7 @@
     <button type="submit">Найти</button>
 </form>
 {% if form.errors %}<p>Некоторые фильтры некорректны и были проигнорированы.</p>{% endif %}
-<ul>
+<ul class="card-list">
 {% for item in page_obj %}
     <li>
         <h2>{{ item.title }}</h2>
@@ -45,11 +49,11 @@
         {% endif %}
     </li>
 {% empty %}
-    <li>Ничего не найдено.</li>
+    <li class="empty">Ничего не найдено.</li>
 {% endfor %}
 </ul>
 {% if page_obj.has_other_pages %}
-<nav>
+<nav class="pagination">
     {% if page_obj.has_previous %}
         <a href="?{% if search_querystring %}{{ search_querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
     {% endif %}
