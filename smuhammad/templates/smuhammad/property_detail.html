@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ property.title }} — RentHub{% endblock %}
 {% block content %}
+<<<<<<< HEAD
 <p class="small-link"><a href="{% url 'simple:search' %}">← К поиску жилья</a></p>
 <div class="property-page-heading"><div><p class="eyebrow">{{ property.category }} · {{ property.location.city }}</p><h1>{{ property.title }}</h1><p class="muted">{{ property.location }}</p></div><span class="badge badge-{{ property.status }}">{{ property.get_status_display }}</span></div>
 {% if property.status == 'rejected' and user.is_authenticated and property.owner_id == user.pk %}<div class="notice notice-error"><strong>Причина отклонения:</strong> {{ property.moderation_reason|default:'не указана' }}</div>{% endif %}
@@ -23,6 +24,57 @@
         <p><a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить</a> · <a href="{% url 'smuhammad:property_images' property.pk %}">Фотографии</a> · <a href="{% url 'smuhammad:property_delete' property.pk %}">Удалить</a></p>
         {% if property.status == 'draft' or property.status == 'rejected' or property.status == 'hidden' %}<form method="post" action="{% url 'smuhammad:property_submit' property.pk %}">{% csrf_token %}<button type="submit" style="width:100%">Отправить на модерацию</button></form>{% endif %}
         {% if property.status == 'approved' or property.status == 'pending' %}<form method="post" action="{% url 'smuhammad:property_hide' property.pk %}">{% csrf_token %}<button class="button-secondary" type="submit" style="width:100%;margin-top:12px">Скрыть из каталога</button></form>{% endif %}
+=======
+  <section class="promo"><h1>{{ property.title }}</h1>
+  <p><span class="pill {{ property.status }}">{{ property.get_status_display }}</span></p>
+  <div class="ticker"><span>{{ property.price }} ₽ / сутки • {{ property.category }} • {{ property.location }} • </span></div>
+  </section>
+
+  <div class="glass"><p>Владелец: <b>{{ property.owner.username }}</b></p></div>
+
+  {% if property.status == 'rejected' and user.is_authenticated and property.owner_id == user.pk %}
+    <p><strong>Причина отклонения:</strong> {{ property.moderation_reason|default:"не указана" }}</p>
+  {% endif %}
+
+  {% for image in property.images.all %}
+    <div class="gallery"><img class="property-img" src="{{ image.image.url }}" alt="{{ property.title }}"></div>
+  {% endfor %}
+
+  <div class="glass">
+  <p><strong>{{ property.price }} ₽ / сутки</strong></p>
+  <p><strong>Категория:</strong> {{ property.category }}</p>
+  <p><strong>Местоположение:</strong> {{ property.location }}</p>
+  <p>{{ property.description }}</p>
+  </div>
+
+  {% if property.amenities.all %}
+    <p><strong>Удобства:</strong>
+      {% for amenity in property.amenities.all %}{{ amenity }}{% if not forloop.last %}, {% endif %}{% endfor %}
+    </p>
+  {% endif %}
+
+  {% if user.is_authenticated and property.owner_id == user.pk %}
+    <hr>
+    <h2>Действия владельца</h2>
+    <p>
+      <a class="btn" href="{% url 'smuhammad:property_edit' property.pk %}">Изменить</a>
+      · <a class="btn" href="{% url 'smuhammad:property_images' property.pk %}">Фотографии</a>
+      · <a class="btn danger" href="{% url 'smuhammad:property_delete' property.pk %}">Удалить</a>
+    </p>
+
+    {% if property.status == 'draft' or property.status == 'rejected' or property.status == 'hidden' %}
+      <form method="post" action="{% url 'smuhammad:property_submit' property.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn">Отправить на модерацию</button>
+      </form>
+    {% endif %}
+
+    {% if property.status == 'approved' or property.status == 'pending' %}
+      <form method="post" action="{% url 'smuhammad:property_hide' property.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn danger">Скрыть из каталога</button>
+      </form>
+>>>>>>> SmUxammad
     {% endif %}
     {% if perms.firuz.moderate_property and property.status == 'pending' and user.pk != property.owner_id %}<hr><a class="button" href="{% url 'firuz:pending_properties' %}">Перейти к модерации</a>{% endif %}
 </aside></div>

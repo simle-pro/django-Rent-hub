@@ -3,7 +3,7 @@
 {% block title %}Фотографии — {{ property.title }}{% endblock %}
 
 {% block content %}
-  <h1>Фотографии: {{ property.title }}</h1>
+  <section class="promo"><h1>Фотографии: {{ property.title }}</h1></section>
   <p>
     <a href="{% url 'smuhammad:property_detail' property.pk %}">К объявлению</a>
     · <a href="{% url 'smuhammad:property_edit' property.pk %}">Изменить описание</a>
@@ -23,11 +23,11 @@
       {% endfor %}
     </div>
   {% else %}
-    <p>Фотографий пока нет.</p>
+    <div class="empty">Фотографий пока нет.</div>
   {% endif %}
 
   <h2>Загрузить фотографии</h2>
-  <form method="post" action="{% url 'smuhammad:property_images_add' property.pk %}" enctype="multipart/form-data">
+  <form method="post" class="glass" action="{% url 'smuhammad:property_images_add' property.pk %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Загрузить</button>
